@@ -1,10 +1,10 @@
 // Product data
 const products = [
-  { "id": 1, "name": "Product 1", "price": 10 },
-  { "id": 2, "name": "Product 2", "price": 20 },
-  { "id": 3, "name": "Product 3", "price": 30 },
-  { "id": 4, "name": "Product 4", "price": 40 },
-  { "id": 5, "name": "Product 5", "price": 50 },
+  { id: 1, name: "Product 1", price: 10 },
+  { id: 2, name: "Product 2", price: 20 },
+  { id: 3, name: "Product 3", price: 30 },
+  { id: 4, name: "Product 4", price: 40 },
+  { id: 5, name: "Product 5", price: 50 },
 ];
 
 // DOM elements
@@ -15,7 +15,7 @@ const clearCartBtn = document.getElementById("clear-cart-btn");
 // Utility function to get cart from session storage
 function getCart() {
   const cart = sessionStorage.getItem("cart");
-  return cart ? JSON.parse(cart) : [];
+  return cart ? JSON.parse(cart) : {};
 }
 
 // Utility function to save cart to session storage
@@ -99,21 +99,26 @@ function renderCart() {
 // Add item to cart
 function addToCart(productId) {
   const cart = getCart();
-  const product = products.find((p) => p.id === productId);
-  if (product) {
-    cart.push(product);
-    saveCart(cart);
-    renderCart();
+  if (cart[productId]) {
+    cart[productId] += 1;
+  } else {
+    cart[productId] = 1;
   }
+  saveCart(cart);
+  renderCart();
 }
 
 // Remove item from cart
 function removeFromCart(productId) {
-  let cart = getCart();
-  cart = cart.filter((product) => product.id !== productId);
-  saveCart(cart);
-  renderCart();
-}
+  const cart = getCart();
+  if (cart[productId]) {
+    cart[productId] -= 1;
+    if (cart[productId] <= 0) {
+      delete cart[productId];
+    }
+    saveCart(cart);
+    renderCart();
+  }
 }
 
 // Clear cart
@@ -128,9 +133,7 @@ clearCartBtn.addEventListener("click", () => {
     clearCart();
   }
 });
-beforeEach(() => {
-  cy.window().then((win) => win.sessionStorage.clear())
-});
+
 // Initial render
 renderProducts();
 renderCart();
